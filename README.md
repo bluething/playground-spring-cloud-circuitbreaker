@@ -1,3 +1,3 @@
-![circuit breaker pattern](https://drive.google.com/uc?export=view&id=1x9aqBYJHw5Nozl4P4dy2slcqCD-EbBbR)
+![circuit breaker pattern](https://github.com/bluething/spring-cloud-circuitbreaker-samples/blob/main/images/circuit%20breaker.png?raw=true)
 
 We want to prevent a network or service failure from cascading to other services.
