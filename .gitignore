@@ -25,3 +25,5 @@ hs_err_pid*
 .idea/
 
 resilience4j/.gradle
+
+resilience4j/gs-cloud-circuit-breaker/.build.gradle.swp
