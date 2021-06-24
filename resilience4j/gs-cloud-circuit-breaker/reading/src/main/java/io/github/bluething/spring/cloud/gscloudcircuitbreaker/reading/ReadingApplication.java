@@ -1,5 +1,6 @@
 package io.github.bluething.spring.cloud.gscloudcircuitbreaker.reading;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,11 +12,16 @@ import reactor.core.publisher.Mono;
 @SpringBootApplication
 public class ReadingApplication {
 
+    private BookService bookService;
+
+    @Autowired
+    public ReadingApplication(BookService bookService) {
+        this.bookService = bookService;
+    }
+
     @RequestMapping(value = "to-read")
     public Mono<String> toRead() {
-        return WebClient.builder().build()
-                .get().uri("http://localhost:8090/recommended").retrieve()
-                .bodyToMono(String.class);
+        return bookService.readingList();
     }
 
     public static void main(String[] args) {
