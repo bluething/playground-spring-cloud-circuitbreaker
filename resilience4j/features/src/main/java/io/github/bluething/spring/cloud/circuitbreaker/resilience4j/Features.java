@@ -1,6 +1,15 @@
 package io.github.bluething.spring.cloud.circuitbreaker.resilience4j;
 
+import io.github.bluething.spring.cloud.circuitbreaker.resilience4j.flight.Flight;
+import io.github.bluething.spring.cloud.circuitbreaker.resilience4j.flight.SearchRequest;
+import io.github.bluething.spring.cloud.circuitbreaker.resilience4j.flight.Service;
+import io.github.bluething.spring.cloud.circuitbreaker.resilience4j.flight.failure.SucceedNTimesAndThenFail;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 public class Features {
     void displayDefaultValues() {
@@ -16,9 +25,38 @@ public class Features {
         System.out.println("is automatic transition from open to half open enabled " + circuitBreakerConfig.isAutomaticTransitionFromOpenToHalfOpenEnabled());
         System.out.println("is writeable stack trace enabled " + circuitBreakerConfig.isWritableStackTraceEnabled());
     }
+
+    void countBasedSlidingWindowFailedCalls() {
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
+                .slidingWindowSize(10)
+                .failureRateThreshold(70.0f)
+                .build();
+        CircuitBreakerRegistry circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
+        CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("flightSearchService");
+
+        Service service = new Service(new SucceedNTimesAndThenFail(3));
+        SearchRequest request = new SearchRequest("NYC", "LAX", "12/31/2020");
+
+        Supplier<List<Flight>> flightSupplier = () -> service.searchFlights(request);
+        Supplier<List<Flight>> decoratedFlightSupplier = circuitBreaker.decorateSupplier(flightSupplier);
+
+        for (int i=0; i<20; i++) {
+            try {
+                System.out.println(decoratedFlightSupplier.get());
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
     public static void main(String[] args) {
         Features features = new Features();
 
         features.displayDefaultValues();
+        System.out.println(" ===== ");
+        features.countBasedSlidingWindowFailedCalls();
     }
 }
