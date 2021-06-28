@@ -14,3 +14,8 @@ automaticTransitionFromOpenToHalfOpenEnabled | false | If set to true it means t
 recordExceptions | empty | A list of exceptions that are recorded as a failure and thus increase the failure rate. Any exception matching or inheriting from one of the list counts as a failure, unless explicitly ignored via `ignoreExceptions`. If you specify a list of exceptions, all other exceptions count as a success, unless they are explicitly ignored by `ignoreExceptions`.
 ignoreExceptions | empty | A list of exceptions that are ignored and neither count as a failure nor success. Any exception matching or inheriting from one of the list will not count as a failure nor success, even if the exceptions is part of `recordExceptions`.
 writableStackTraceEnabled | true | Enables writable stack traces. When set to false, Exception.getStackTrace() returns a zero length array. This may be used to reduce log spam when the circuit breaker is open as the cause of the exceptions is already known (the circuit breaker is short-circuiting calls).
+
+#### Count-based sliding window
+
+The count-based sliding window is implemented with a circular array of N measurements.  If the count window size is 10, the circular array has always 10 measurements.  The sliding window incrementally updates a total aggregation. The total aggregation is updated when a new call outcome is recorded. When the oldest measurement is evicted, the measurement is subtracted from the total aggregation and the bucket is reset. (Subtract-on-Evict)  
+The time to retrieve a Snapshot is constant O(1), since the Snapshot is pre-aggregated and is independent of the window size.  The space requirement (memory consumption) of this implementation should be O(n).
