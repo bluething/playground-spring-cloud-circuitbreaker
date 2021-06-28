@@ -82,13 +82,41 @@ public class Features {
 
     }
 
+    void countBasedSlidingWindowFailureAndSlowCalls() {
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
+                .slidingWindowSize(10)
+                .failureRateThreshold(70.0f)
+                .slowCallRateThreshold(70.0f)
+                .slowCallDurationThreshold(Duration.ofSeconds(2))
+                .build();
+        CircuitBreakerRegistry circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
+        CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("flightSearchService");
+
+        Service service = new Service(new SucceedNTimesAndThenFail(3), new AlwaysSlowNSeconds(2));
+        SearchRequest request = new SearchRequest("NYC", "LAX", "12/31/2020");
+
+        Supplier<List<Flight>> flightSupplier = circuitBreaker.decorateSupplier(() -> service.searchFlights(request));
+
+        for (int i=0; i<20; i++) {
+            try {
+                System.out.println(flightSupplier.get());
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static void main(String[] args) {
         Features features = new Features();
 
         features.displayDefaultValues();
         System.out.println(" ===== ");
-        features.countBasedSlidingWindowFailedCalls();
+        //features.countBasedSlidingWindowFailedCalls();
         System.out.println(" ===== ");
-        features.countBasedSlidingWindowSlowCalls();
+        //features.countBasedSlidingWindowSlowCalls();
+        System.out.println(" ===== ");
+        features.countBasedSlidingWindowFailureAndSlowCalls();
     }
 }
