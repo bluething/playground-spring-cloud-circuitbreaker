@@ -199,7 +199,14 @@ gradle-app.setting
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,linux,intellij,java,java-web,gradle
 
-resilience4j/.gradle
-resilience4j/.idea
+resilience4j/.idea/artifacts
+resilience4j/.idea/compiler.xml
+resilience4j/.idea/jarRepositories.xml
+resilience4j/.idea/modules.xml
+resilience4j/.idea/*.iml
+resilience4j/.idea/modules
+resilience4j/.idea/gradle.xml
+resilience4j/.idea/**/uiDesigner.xml
+
 resilience4j/features/.gradle
 resilience4j/features/build
